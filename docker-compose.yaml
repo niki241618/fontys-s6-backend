@@ -1,0 +1,82 @@
+version: "3.8"
+services:
+  db:
+    image: mariadb:latest
+    container_name: mariadb
+    restart: unless-stopped
+    environment:
+      MARIADB_ROOT_PASSWORD: password
+    ports: 
+      - 3306:3306
+    volumes:
+      - mariadb_volume:/var/lib/mysql
+
+  adminer:
+    image: adminer
+    restart: unless-stopped
+    ports: 
+      - 8081:8080
+  
+  book-info:
+    image: book-info
+    restart: unless-stopped
+    env_file:
+      - .env
+    depends_on:
+      - db
+    ports:
+      - 5209:80
+
+  book-streaming:
+    image: book-streaming
+    restart: unless-stopped
+    env_file:
+      - .env
+    depends_on:
+      - db
+    ports:
+      - 5297:80
+
+  logger-service:
+    image: logger-service
+    restart: unless-stopped
+    env_file:
+      - .env
+    depends_on:
+      - db
+      - rabbitmq
+    ports:
+      - 5298:80
+
+  # logger2-service:
+  #   image: logger-service
+  #   restart: unless-stopped
+  #   depends_on:
+  #     - db
+  #     - rabbitmq
+  #   ports:
+  #     - 5299:80
+
+  frontend:
+    image: frontend
+    restart: unless-stopped
+    ports:
+      - 3000:3000
+  gateway:
+    image: devopsfaith/krakend:latest
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./krakend.json:/etc/krakend/krakend.json
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+    container_name: 'rabbitmq'
+    ports:
+        - 5672:5672
+        - 15672:15672
+    volumes:
+        - ./rabbitmq/data/:/var/lib/rabbitmq/
+        - ./rabbitmq/log/:/var/log/rabbitmq
+volumes:
+  mariadb_volume:
+    name: audiobooksinfo_mariadb_volume

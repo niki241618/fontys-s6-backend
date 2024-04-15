@@ -1,0 +1,17 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: platforms-depl
+spec:
+  replicas: 1
+  selector: 
+    matchLabels:
+      app: book-info-service
+  template:
+    metadata:
+      labels:
+        app: book-info-service
+    spec:
+      containers:
+        - name: book-info-service
+          image: niki241618/book-info-service

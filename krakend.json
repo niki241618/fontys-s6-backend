@@ -1,0 +1,57 @@
+{
+  "version": 3,
+  "endpoints": [
+    {
+      "endpoint": "/api/audiobooks",
+      "output_encoding":"no-op",
+      "method": "GET",
+      "backend": [
+        {
+          "url_pattern": "/api/audiobooks",
+          "host": ["http://book-info:80"],
+          "disable_host_sanitize": true
+        }
+      ]
+    },
+    {
+      "endpoint": "/api/audiobooks/:id",
+      "method": "GET",
+      "backend": [
+        {
+          "url_pattern": "/api/audiobooks/:id",
+          "host": ["http://book-info:80"]
+        }
+      ]
+    },
+    {
+      "endpoint": "/api/audiobooks",
+      "method": "POST",
+      "backend": [
+        {
+          "url_pattern": "/api/audiobooks",
+          "host": ["http://book-info:80"]
+        }
+      ]
+    },
+    {
+      "endpoint": "/api/audiobooks/:id",
+      "method": "DELETE",
+      "backend": [
+        {
+          "url_pattern": "/api/audiobooks/:id",
+          "host": ["http://book-info:80"]
+        }
+      ]
+    },
+    {
+      "endpoint": "/api/streaming",
+      "method": "GET",
+      "backend": [
+        {
+          "url_pattern": "/api/streaming",
+          "host": ["http://book-streaming:80"]
+        }
+      ]
+    }
+  ]
+}
