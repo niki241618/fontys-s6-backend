@@ -62,4 +62,5 @@ return;
 void AddServices(WebApplicationBuilder builder)
 {
 	builder.Services.AddScoped<IBooksService, BooksService>();
+	builder.Services.AddScoped<IBooksFilesService, AzureBlobService>();
 }
