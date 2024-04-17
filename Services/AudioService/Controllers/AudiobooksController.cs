@@ -15,23 +15,9 @@ namespace AudioService.Controllers
     public class AudiobooksController : ControllerBase
     {
         private readonly IBooksService booksService;
-        private readonly BlobContainerClient audioFilesContainerClient;
-        private readonly BlobContainerClient coverImagesContainerClient;
-
-        public AudiobooksController(IBooksService booksService, IConfiguration configuration)
+        public AudiobooksController(IBooksService booksService)
         {
             this.booksService = booksService;
-            
-            // Create a BlobServiceClient object which will be used to create a container client
-            string connectionString = configuration["AzureBlobStorage:ConnectionString"] ?? throw new NotFoundException("Couldn't find AzureBlobStorage:ConnectionString in appsettings.json");
-            BlobServiceClient blobServiceClient = new BlobServiceClient(connectionString);
-            
-            // Get a reference to a container
-            string audioFilesContainerName = configuration["AzureBlobStorage:AudioFilesContainerName"] ?? throw new NotFoundException("Couldn't find AzureBlobStorage:ContainerName in appsettings.json");
-            audioFilesContainerClient = blobServiceClient.GetBlobContainerClient(audioFilesContainerName);
-            
-            string coverImagesContainerName = configuration["AzureBlobStorage:CoverImagesContainerName"] ?? throw new NotFoundException("Couldn't find AzureBlobStorage:CoverImagesContainerName in appsettings.json");
-            coverImagesContainerClient = blobServiceClient.GetBlobContainerClient(coverImagesContainerName);
         }
         
         [HttpGet]
@@ -66,67 +52,14 @@ namespace AudioService.Controllers
                 Length = AudioHelper.GetAudioDurationInSeconds(bookDto.AudioFile)
             };
             
-            // Create the container if it doesn't exist
-            await audioFilesContainerClient.CreateIfNotExistsAsync();
-
-            // Get a unique name for the blob
-            string audiofileBlobName = $"{Guid.NewGuid()}{Path.GetExtension(bookDto.AudioFile.FileName)}";
-
-            // Get a reference to a blob
-            BlobClient audiofileBlobClient = audioFilesContainerClient.GetBlobClient(audiofileBlobName);
-
-            // Upload the file to blob storage
-            await using (var stream = bookDto.AudioFile.OpenReadStream())
-            {
-                await audiofileBlobClient.UploadAsync(stream, true);
-            }
-            
-            book.AudioFileName = audiofileBlobName;
-
-            //If a cover image was uploaded
-            if (bookDto.CoverImage.Length > 0)
-            {
-                await coverImagesContainerClient.CreateIfNotExistsAsync();
-                // Get a unique name for the blob
-                string coverImageBlobName = $"{Guid.NewGuid()}{Path.GetExtension(bookDto.CoverImage.FileName)}";
-                
-                // Get a reference to a blob
-                BlobClient coverImageBlobClient = coverImagesContainerClient.GetBlobClient(coverImageBlobName);
-
-                // Upload the file to blob storage
-                await using var stream = bookDto.CoverImage.OpenReadStream();
-                await coverImageBlobClient.UploadAsync(stream, true);
-                
-                book.CoverUri = coverImageBlobClient.Uri.ToString();
-            }
-
-            try
-            {
-                int createdId = await booksService.CreateBook(book);
-                return Ok(createdId);
-            }
-            catch (Exception)
-            {
-                //Delete the audiofile in case of an error.
-                await audiofileBlobClient.DeleteIfExistsAsync();
-                throw;
-            }
+            int createdId = await booksService.CreateBook(book, bookDto.AudioFile, bookDto.CoverImage);
+            return Ok(createdId);
         }
         
         [HttpDelete("{id:int}")]
         public async Task<IActionResult> DeleteBook(int id)
         {
-            Book book = await booksService.GetBook(id);
-            
-            BlobClient audiofileBlobClient = audioFilesContainerClient.GetBlobClient(book.AudioFileName);
-            await audiofileBlobClient.DeleteIfExistsAsync();
-            
-            string coverImageBlobName = book.CoverUri.Split('/').Last();
-            BlobClient coverImageBlobClient = coverImagesContainerClient.GetBlobClient(coverImageBlobName);
-            await coverImageBlobClient.DeleteIfExistsAsync();
-            
             await booksService.DeleteBook(id);
-            
             return Ok();
         }
     }
