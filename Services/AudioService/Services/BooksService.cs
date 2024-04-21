@@ -10,10 +10,12 @@ namespace AudioService.Services;
 public class BooksService: IBooksService
 {
 	private readonly BooksContext dbContext;
+	private readonly IBooksFilesService booksFilesService;
 
-	public BooksService(BooksContext dbContext)
+	public BooksService(BooksContext dbContext, IBooksFilesService booksFilesService)
 	{
 		this.dbContext = dbContext;
+		this.booksFilesService = booksFilesService;
 	}
 	
 	public async Task<Book[]> GetBooks()
@@ -39,7 +41,7 @@ public class BooksService: IBooksService
 		return book.Convert(ratingInfo) ;
 	}
 
-	public async Task<int> CreateBook(Book toBeCreated)
+	public async Task<int> CreateBook(Book toBeCreated, IFormFile audioFile, IFormFile coverImage)
 	{
 		BookEntity bookEntity = new BookEntity
 		{
@@ -49,10 +51,29 @@ public class BooksService: IBooksService
 			Genre = toBeCreated.Genre,
 			Authors = toBeCreated.Authors,
 			Length = toBeCreated.Length,
-			AudioUri = toBeCreated.AudioFileName,
-			CoverUri = toBeCreated.CoverUri
 		};
-
+		
+		string audiofileBlobName = GenerateBlobName(audioFile.FileName);
+		
+		await booksFilesService.UploadAudioFileAsync(audiofileBlobName, audioFile);
+		bookEntity.AudioUri = audiofileBlobName;
+		
+		if (coverImage.Length > 0)
+		{
+			try
+			{
+				string coverImageBlobName = GenerateBlobName(coverImage.FileName);
+				
+				string uri = await booksFilesService.UploadCoverImageAsync(coverImageBlobName, coverImage);
+				bookEntity.CoverUri = uri;
+			}
+			catch (Exception)
+			{
+				await booksFilesService.DeleteAudioFileAsync(audiofileBlobName);
+				throw;
+			}
+		}
+		
 		await dbContext.Books.AddAsync(bookEntity);
 		await dbContext.SaveChangesAsync();
 		return bookEntity.Id;
@@ -64,6 +85,11 @@ public class BooksService: IBooksService
 		                  ?? throw new NotFoundException($"Book with ID {id} is not found.");
 		
 		dbContext.Books.Remove(book);
+		await booksFilesService.DeleteAudioFileAsync(book.AudioUri);
+		
+		string coverImageBlobName = book.CoverUri.Split('/').Last();
+		await booksFilesService.DeleteCoverImageAsync(coverImageBlobName);
+		
 		await dbContext.SaveChangesAsync();
 	}
 
@@ -81,5 +107,10 @@ public class BooksService: IBooksService
 			TotalRatings = totalRatings,
 			AverageRating = averageRating
 		};
+	}
+	
+	private string GenerateBlobName(string fileName)
+	{
+		return $"{Guid.NewGuid()}{Path.GetExtension(fileName)}";
 	}
 }
