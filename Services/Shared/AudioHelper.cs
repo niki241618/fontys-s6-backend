@@ -13,7 +13,7 @@ public static class AudioHelper
 
 	public static bool IsAudiofile(IFormFile file)
 	{
-		if (file == null || file.Length <= 0) 
+		if (file == null || file.Length <= 0 || string.IsNullOrEmpty(file.ContentType)) 
 			return false; // If file is null or empty, it's not an audio file
 		
 		// Get the MIME type of the file

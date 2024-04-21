@@ -36,7 +36,7 @@ namespace AudioService.Controllers
         [RequestFormLimits(MultipartBodyLengthLimit = 724288000)] //690 mb
         public async Task<IActionResult> CreateBook([FromForm] BookDTO bookDto)
         {
-            if (bookDto.AudioFile.Length == 0)
+            if (bookDto.AudioFile == null || bookDto.AudioFile.Length == 0)
                 return BadRequest("No audio file uploaded.");
             
             if(!AudioHelper.IsAudiofile(bookDto.AudioFile))
