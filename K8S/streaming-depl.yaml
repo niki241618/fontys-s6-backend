@@ -1,0 +1,30 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: streaming-depl
+spec:
+  replicas: 1
+  selector: 
+    matchLabels:
+      app: streaming-service
+  template:
+    metadata:
+      labels:
+        app: streaming-service
+    spec:
+      containers:
+        - name: book-streaming-service
+          image: niki241618/book-streaming-service
+#Declare the node port
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: streaming-service-nodeport
+spec:
+  type: NodePort
+  selector:
+    app: streaming-service
+  ports:
+    - port: 80
+      targetPort: 80

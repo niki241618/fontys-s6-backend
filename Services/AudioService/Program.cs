@@ -1,5 +1,6 @@
 using System.Text.Json.Serialization;
 using AudioService.Data;
+using AudioService.Extensions;
 using AudioService.Services;
 using AudioService.Services.Interfaces;
 using Microsoft.AspNetCore.Http.Features;
@@ -55,6 +56,8 @@ app.UseAuthorization();
 app.UseErrorHandling();
 
 app.MapControllers();
+
+app.ApplyMigrations().GetAwaiter().GetResult();
 
 app.Run();
 return;
