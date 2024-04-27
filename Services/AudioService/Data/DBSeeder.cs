@@ -51,5 +51,6 @@ public class DbSeeder
 			AudioUri = "4c83c2c9-8307-4ee8-a2fe-32b578bd2d0d.mp3",
 			CoverUri = "https://audiooasisaudiobookstest.blob.core.windows.net/coverimages/c52017ca-8ebc-4e3c-8d65-532cc5cf715b.jpg"
 		});
+		dbContext.SaveChanges();
 	}
 }
