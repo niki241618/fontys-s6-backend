@@ -1,5 +1,15 @@
 {
   "version": 3,
+  "extra_config": {
+    "github_com/devopsfaith/krakend-cors": {
+      "allow_origins": ["*"],
+      "allow_methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+      "allow_headers": ["Origin", "Authorization", "Content-Type", "Accept"],
+      "expose_headers": ["Content-Length"],
+      "max_age": "12h",
+      "allow_credentials": true
+    }
+  },
   "endpoints": [
     {
       "endpoint": "/api/audiobooks",
@@ -14,17 +24,19 @@
       ]
     },
     {
-      "endpoint": "/api/audiobooks/:id",
+      "endpoint": "/api/audiobooks/{id}",
+      "output_encoding":"no-op",
       "method": "GET",
       "backend": [
         {
-          "url_pattern": "/api/audiobooks/:id",
+          "url_pattern": "/api/audiobooks/{id}",
           "host": ["http://book-info:80"]
         }
       ]
     },
     {
       "endpoint": "/api/audiobooks",
+      "output_encoding":"no-op",
       "method": "POST",
       "backend": [
         {
@@ -34,21 +46,23 @@
       ]
     },
     {
-      "endpoint": "/api/audiobooks/:id",
+      "endpoint": "/api/audiobooks/{id}",
+      "output_encoding":"no-op",
       "method": "DELETE",
       "backend": [
         {
-          "url_pattern": "/api/audiobooks/:id",
+          "url_pattern": "/api/audiobooks/{id}",
           "host": ["http://book-info:80"]
         }
       ]
     },
     {
-      "endpoint": "/api/streaming",
+      "endpoint": "/api/streaming/{filename}",
+      "output_encoding":"no-op",
       "method": "GET",
       "backend": [
         {
-          "url_pattern": "/api/streaming",
+          "url_pattern": "/api/streaming/{filename}",
           "host": ["http://book-streaming:80"]
         }
       ]
