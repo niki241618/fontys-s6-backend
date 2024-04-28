@@ -12,7 +12,7 @@ public static class WebAppExtensions
 		using var scope = app.Services.CreateScope();
 	
 		var dbContext = scope.ServiceProvider.GetRequiredService<BooksContext>();
-		new DbSeeder(dbContext).Seed(); // Your custom seed function
+		new DbSeeder(dbContext).Seed();
 
 		return app;
 	}
