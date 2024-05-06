@@ -1,10 +1,12 @@
 using System.Text.Json.Serialization;
+using AudioService;
 using AudioService.Data;
 using AudioService.Extensions;
 using AudioService.Services;
 using AudioService.Services.Interfaces;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.EntityFrameworkCore;
+using Shared;
 using Shared.SharedMiddleware;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -51,8 +53,9 @@ if (app.Environment.IsDevelopment())
 app.UseCors("Corsapp");
 app.UseErrorHandling();
 app.UseHttpsRedirection();
-
+app.UseSeeding();
 app.UseAuthorization();
+// app.UseLogging(new ConsoleLogger());
 app.UseErrorHandling();
 
 app.MapControllers();
