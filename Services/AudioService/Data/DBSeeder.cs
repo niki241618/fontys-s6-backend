@@ -63,10 +63,12 @@ public class DbSeeder
 		var existingBook = dbContext.Books.FirstOrDefault(x => x.Id == book.Id);
 		if (existingBook == null)
 		{
+			Console.WriteLine("Book with ID {0} not found. Adding new book.", book.Id);
 			dbContext.Books.Add(book);
 		}
 		else
 		{
+			Console.WriteLine("Book with ID {0} found. Updating book.", book.Id);
 			existingBook.Name = book.Name;
 			existingBook.Authors = book.Authors;
 			existingBook.Description = book.Description;

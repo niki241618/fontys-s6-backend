@@ -17,9 +17,17 @@ spec:
           image: niki241618/book-info-service
           env:
             - name: "AzureBlobStorage__ConnectionString"
-              value: ""
+              valueFrom: 
+                secretKeyRef:
+                  name: 'app-secrets'
+                  key: 'AzureBlobStorage__ConnectionString'
             - name: "ConnectionStrings__DatabaseConnection"
-              value: ""
+              valueFrom: 
+                secretKeyRef:
+                  name: 'app-secrets'
+                  key: 'ConnectionStrings__DatabaseConnection'
+            - name: 'SeedDatabase'
+              value: 'true'
 #Declare the node port
 ---
 apiVersion: v1

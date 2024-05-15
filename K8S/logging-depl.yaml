@@ -15,6 +15,12 @@ spec:
       containers:
         - name: logging-service
           image: niki241618/logging-service
+          env:
+            - name: 'ConnectionStrings__DatabaseConnection'
+              valueFrom: 
+                secretKeyRef:
+                  name: 'app-secrets'
+                  key: 'ConnectionStrings__DatabaseConnection'
 #Declare the node port
 ---
 apiVersion: v1

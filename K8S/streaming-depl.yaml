@@ -15,6 +15,12 @@ spec:
       containers:
         - name: book-streaming-service
           image: niki241618/book-streaming-service
+          env:
+            - name: 'AzureBlobStorage__ConnectionString'
+              valueFrom: 
+                secretKeyRef:
+                  name: 'app-secrets'
+                  key: 'AzureBlobStorage__ConnectionString'
 #Declare the node port
 ---
 apiVersion: v1
