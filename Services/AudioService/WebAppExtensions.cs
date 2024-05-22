@@ -16,7 +16,6 @@ public static class WebAppExtensions
 		var dbContext = scope.ServiceProvider.GetRequiredService<BooksContext>();
 		new DbSeeder(dbContext).Seed();
 		Console.WriteLine("Database seeded.");
-		
 		return app;
 	}
 }
