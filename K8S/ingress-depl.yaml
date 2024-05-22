@@ -1,0 +1,38 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: my-ingress
+  annotations:
+    # CORS related annotations
+    nginx.ingress.kubernetes.io/enable-cors: "true"
+    nginx.ingress.kubernetes.io/cors-allow-methods: "GET, POST, PUT, DELETE, OPTIONS"
+    nginx.ingress.kubernetes.io/cors-allow-headers: "Origin, Authorization, Content-Type, Accept"
+    nginx.ingress.kubernetes.io/cors-expose-headers: "Content-Length"
+    nginx.ingress.kubernetes.io/cors-allow-credentials: "true"
+    nginx.ingress.kubernetes.io/cors-max-age: "43200"  # 12 hours in seconds
+spec:
+  ingressClassName: nginx
+  rules:
+    - http:
+        paths:
+          - path: /api/audiobooks
+            pathType: Prefix
+            backend:
+              service:
+                name: book-info-service-nodeport
+                port:
+                  number: 80
+          - path: /api/streaming
+            pathType: Prefix
+            backend:
+              service:
+                name: streaming-service-nodeport
+                port:
+                  number: 80
+          - path: /api/logging
+            pathType: Prefix
+            backend:
+              service:
+                name: logging-service-nodeport
+                port:
+                  number: 80

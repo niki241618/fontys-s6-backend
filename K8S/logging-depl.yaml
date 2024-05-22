@@ -1,0 +1,58 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: logging-depl
+spec:
+  replicas: 1
+  selector: 
+    matchLabels:
+      app: logging-service
+  template:
+    metadata:
+      labels:
+        app: logging-service
+    spec:
+      containers:
+        - name: logging-service
+          image: niki241618/logging-service
+          resources:
+            requests: #Claimed resources
+              memory: "128Mi"
+              cpu: "100m" #10% of the core
+            limits:   #Maximum resources
+              memory: "256Mi"
+              cpu: "250m" #25% of the core
+          env:
+            - name: 'ConnectionStrings__DatabaseConnection'
+              valueFrom: 
+                secretKeyRef:
+                  name: 'app-secrets'
+                  key: 'ConnectionStrings__DatabaseConnection'
+#Declare the node port
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: logging-service-nodeport
+spec:
+  type: NodePort
+  selector:
+    app: logging-service
+  ports:
+    - port: 80
+      targetPort: 80
+#Auto-Scaling
+---
+apiVersion: autoscaling/v1
+kind: HorizontalPodAutoscaler
+metadata:
+  name: logging-hpa
+  namespace: default
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: logging-depl
+  minReplicas: 1
+  maxReplicas: 2
+  targetCPUUtilizationPercentage: 80

@@ -18,7 +18,7 @@ services:
       - 8081:8080
   
   book-info:
-    image: book-info
+    image: niki241618/book-info-service
     restart: unless-stopped
     env_file:
       - .env
@@ -28,7 +28,7 @@ services:
       - 5209:80
 
   book-streaming:
-    image: book-streaming
+    image: niki241618/book-streaming-service
     restart: unless-stopped
     env_file:
       - .env
@@ -38,7 +38,7 @@ services:
       - 5297:80
 
   logger-service:
-    image: logger-service
+    image: niki241618/logging-service
     restart: unless-stopped
     env_file:
       - .env
