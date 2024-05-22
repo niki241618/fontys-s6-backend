@@ -1,0 +1,56 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: rabbitmq-deployment
+  labels:
+    app: rabbitmq
+    version: "1.0"
+spec:
+  replicas: 1
+  serviceName: rabbitmq-service
+  selector:
+    matchLabels:
+      app: rabbitmq
+  template:
+    metadata:
+      labels:
+        app: rabbitmq
+        version: "1.0"
+    spec:
+      containers:
+      - name: rabbitmq-container
+        image: rabbitmq:3-management
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 5672
+        - containerPort: 15672
+        resources:
+          limits:
+            cpu: 300m
+            memory: 521Mi
+          requests:
+            cpu: 150m
+            memory: 256Mi
+  volumeClaimTemplates:
+  - metadata:
+      name: rabbitmq-data
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      resources:
+        requests:
+          storage: 1Gi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: rabbitmq-service
+  labels:
+    app: rabbitmq
+spec: 
+  ports:
+    - name: amqp
+      port: 5672
+    - name: management
+      port: 15672
+  selector:
+    app: rabbitmq
