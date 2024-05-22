@@ -1,8 +1,9 @@
 apiVersion: apps/v1
-kind: Deployment
+kind: StatefulSet
 metadata:
-  name: mariadb-deployment
+  name: mariadb-statefulset
 spec:
+  serviceName: "mariadb-service"
   replicas: 1
   selector:
     matchLabels:
@@ -25,11 +26,22 @@ spec:
         volumeMounts:
         - mountPath: /var/lib/mysql
           name: mariadb-storage
+        - mountPath: /etc/mysql/conf.d
+          name: custom-config
       volumes:
-      - name: mariadb-storage
-        persistentVolumeClaim:
-          claimName: mariadb-pvc
-#Cluster IP service. The book info service should specify 'mariadb-service' in the connection string as the address to the DB.
+      - name: custom-config
+        configMap:
+          name: mariadb-config
+  volumeClaimTemplates:
+  - metadata:
+      name: mariadb-storage
+    spec:
+      accessModes: ["ReadWriteOnce"]
+      resources:
+        requests:
+          storage: 2Gi #2 GB because of development. In production it will be way more.
+
+# Cluster IP service for MariaDB
 ---
 apiVersion: v1
 kind: Service
@@ -41,16 +53,3 @@ spec:
   ports:
     - port: 3306
   clusterIP: None
-
-#Volume Claim
----
-apiVersion: v1
-kind: PersistentVolumeClaim
-metadata:
-  name: mariadb-pvc
-spec:
-  accessModes:
-    - ReadWriteOnce
-  resources:
-    requests:
-      storage: 1Gi

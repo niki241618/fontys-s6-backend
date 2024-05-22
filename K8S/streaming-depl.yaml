@@ -15,6 +15,13 @@ spec:
       containers:
         - name: book-streaming-service
           image: niki241618/book-streaming-service
+          resources:
+            requests: #Claimed resources
+              memory: "256Mi"
+              cpu: "250m" #1/4 of the core
+            limits:   #Maximum resources
+              memory: "1024Mi"
+              cpu: "1000m" #1 core
           env:
             - name: 'AzureBlobStorage__ConnectionString'
               valueFrom: 
@@ -34,3 +41,18 @@ spec:
   ports:
     - port: 80
       targetPort: 80
+#Auto-Scaling
+---
+apiVersion: autoscaling/v1
+kind: HorizontalPodAutoscaler
+metadata:
+  name: streaming-hpa
+  namespace: default
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: streaming-depl
+  minReplicas: 1
+  maxReplicas: 5
+  targetCPUUtilizationPercentage: 80

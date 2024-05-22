@@ -15,6 +15,13 @@ spec:
       containers:
         - name: book-info-service
           image: niki241618/book-info-service
+          resources:
+            requests: #Claimed resources
+              memory: "256Mi"
+              cpu: "250m" #1/4 of the core
+            limits:   #Maximum resources
+              memory: "512Mi"
+              cpu: "500m" #1/2 of the core
           env:
             - name: "AzureBlobStorage__ConnectionString"
               valueFrom: 
@@ -41,3 +48,18 @@ spec:
   ports:
     - port: 80
       targetPort: 80
+#Auto-Scaling
+---
+apiVersion: autoscaling/v1
+kind: HorizontalPodAutoscaler
+metadata:
+  name: book-info-hpa
+  namespace: default
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: book-info-depl
+  minReplicas: 1
+  maxReplicas: 5
+  targetCPUUtilizationPercentage: 80
