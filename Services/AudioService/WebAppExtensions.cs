@@ -9,11 +9,13 @@ public static class WebAppExtensions
 		if (app.Configuration["SeedDatabase"] != "true")
 			return app;
 		
+		Console.WriteLine("Seeding the database...");
+		
 		using var scope = app.Services.CreateScope();
 	
 		var dbContext = scope.ServiceProvider.GetRequiredService<BooksContext>();
 		new DbSeeder(dbContext).Seed();
-
+		Console.WriteLine("Database seeded.");
 		return app;
 	}
 }
