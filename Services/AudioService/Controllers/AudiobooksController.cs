@@ -2,9 +2,11 @@ using AudioService.DTOs;
 using AudioService.Models;
 using AudioService.Services.Interfaces;
 using Azure.Storage.Blobs;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Shared;
+using Shared.Auth;
 using Shared.Classes;
 using Shared.Exceptions;
 
@@ -25,13 +27,14 @@ namespace AudioService.Controllers
         {
             return Ok(await booksService.GetBooks());
         }
-
+        
         [HttpGet("{id:int}")]
         public async Task<IActionResult> GetBook(int id)
         {
             return Ok(await booksService.GetBook(id));
         }
 
+        [Authorize]
         [HttpPost]
         [RequestFormLimits(MultipartBodyLengthLimit = 724288000)] //690 mb
         public async Task<IActionResult> CreateBook([FromForm] BookDTO bookDto)
@@ -56,6 +59,7 @@ namespace AudioService.Controllers
             return Ok(createdId);
         }
         
+        [Authorize]
         [HttpDelete("{id:int}")]
         public async Task<IActionResult> DeleteBook(int id)
         {

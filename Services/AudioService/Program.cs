@@ -4,8 +4,10 @@ using AudioService.Data;
 using AudioService.Extensions;
 using AudioService.Services;
 using AudioService.Services.Interfaces;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.OpenApi.Models;
 using Shared;
 using Shared.SharedMiddleware;
 
@@ -15,8 +17,45 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+builder.Services.AddAuthentication(options =>
+{
+	options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+	options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+})
+.AddJwtBearer(options =>
+{
+	options.Authority = $"https://{builder.Configuration["Auth0:Domain"]}/";
+	options.Audience = builder.Configuration["Auth0:Audience"];
+});
+
+builder.Services.AddAuthorization();
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen(setup =>
+{
+	// Include 'SecurityScheme' to use JWT Authentication
+	var jwtSecurityScheme = new OpenApiSecurityScheme
+	{
+		BearerFormat = "JWT",
+		Name = "JWT Authentication",
+		In = ParameterLocation.Header,
+		Type = SecuritySchemeType.Http,
+		Scheme = JwtBearerDefaults.AuthenticationScheme,
+		Description = "Put **_ONLY_** your JWT Bearer token on textbox below!",
+
+		Reference = new OpenApiReference
+		{
+			Id = JwtBearerDefaults.AuthenticationScheme,
+			Type = ReferenceType.SecurityScheme
+		}
+	};
+
+	setup.AddSecurityDefinition(jwtSecurityScheme.Reference.Id, jwtSecurityScheme);
+
+	setup.AddSecurityRequirement(new OpenApiSecurityRequirement
+	{
+		{ jwtSecurityScheme, Array.Empty<string>() }
+	});
+});
 builder.Services.AddDbContext<BooksContext>(options =>
 {
 	string connectionString = builder.Configuration.GetConnectionString("DatabaseConnection");
@@ -74,6 +113,7 @@ if (app.Environment.IsDevelopment())
 app.UseCors("Corsapp");
 app.UseErrorHandling();
 app.UseHttpsRedirection();
+app.UseAuthentication();
 app.UseAuthorization();
 app.UseErrorHandling();
 app.UseLogging(new RabbitMqLogger(app.Configuration.GetConnectionString("RabbitMqConnection")));
