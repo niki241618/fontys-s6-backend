@@ -33,6 +33,11 @@ spec:
                 secretKeyRef:
                   name: 'app-secrets'
                   key: 'ConnectionStrings__DatabaseConnection'
+            - name: "ConnectionStrings__RabbitMqHostName"
+              valueFrom:
+                configMapKeyRef:
+                  name: 'config'
+                  key: 'RabbitMqHostName'
             - name: 'SeedDatabase'
               value: 'true'
 #Declare the node port

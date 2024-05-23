@@ -75,8 +75,8 @@ app.UseCors("Corsapp");
 app.UseErrorHandling();
 app.UseHttpsRedirection();
 app.UseAuthorization();
-// app.UseLogging(new ConsoleLogger());
 app.UseErrorHandling();
+app.UseLogging(new RabbitMqLogger(app.Configuration.GetConnectionString("RabbitMqConnection")));
 
 app.MapControllers();
 

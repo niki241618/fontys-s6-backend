@@ -29,7 +29,7 @@ spec:
                 name: streaming-service-nodeport
                 port:
                   number: 80
-          - path: /api/logging
+          - path: /api/logs
             pathType: Prefix
             backend:
               service:

@@ -8,9 +8,9 @@ export let errorRate = new Rate('errors');
 // Define the test options
 export let options = {
     stages: [
-        { duration: '2m', target: 100 }, // ramp-up to 100 users over 2 minutes
+        { duration: '30s', target: 100 }, // ramp-up to 100 users over 30 sec
         { duration: '5m', target: 100 }, // maintain 100 users for 5 minutes
-        { duration: '2m', target: 0 },   // ramp-down to 0 users over 2 minutes
+        { duration: '30s', target: 0 },   // ramp-down to 0 users over 2 minutes
     ],
     thresholds: {
         'http_req_duration': ['p(95)<300'], // 95% of requests must complete below 200ms

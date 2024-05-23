@@ -5,7 +5,7 @@ using Shared.Classes;
 namespace LoggingService.Controllers;
 
 [ApiController]
-[Route("[controller]")]
+[Route("api/[controller]")]
 public class LogsController : ControllerBase
 {
 	private readonly LoggingService loggingService;

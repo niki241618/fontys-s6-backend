@@ -10,12 +10,12 @@ namespace Shared.SharedMiddleware;
 public class LoggingMiddleware
 {
 	private readonly RequestDelegate next;
-	private readonly ILogging logging;
+	private readonly ILogger logger;
 	
-	public LoggingMiddleware(RequestDelegate next, ILogging logging)
+	public LoggingMiddleware(RequestDelegate next, ILogger logger)
 	{
 		this.next = next;
-		this.logging = logging;
+		this.logger = logger;
 	}
 
 	public async Task Invoke(HttpContext ctx)
@@ -26,7 +26,7 @@ public class LoggingMiddleware
 		}
 		catch (Exception e)
 		{
-			logging.Log(new Log(e.Message, Log.Type.ERROR));
+			logger.Log(new Log(e.Message, Log.Type.ERROR));
 			throw;
 		}
 	}
@@ -34,8 +34,8 @@ public class LoggingMiddleware
 
 public static class LoggingMiddlewareExtensions
 {
-	public static IApplicationBuilder UseLogging(this IApplicationBuilder builder, ILogging logging)
+	public static IApplicationBuilder UseLogging(this IApplicationBuilder builder, ILogger logger)
 	{
-		return builder.UseMiddleware<LoggingMiddleware>(logging);
+		return builder.UseMiddleware<LoggingMiddleware>(logger);
 	}
 }
