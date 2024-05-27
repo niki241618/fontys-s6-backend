@@ -19,7 +19,7 @@ jobs:
     steps:
     - name: Checkout code
       uses: actions/checkout@v3
-
+      
     - name: Setup .NET
       uses: actions/setup-dotnet@v2
       with:
@@ -31,5 +31,57 @@ jobs:
     - name: Build
       run: dotnet build --no-restore
 
+    - name: Publish
+      run: dotnet publish -c Release -o out
+
     - name: Run tests
       run: dotnet test --no-build
+
+  zap_scan:
+    runs-on: ubuntu-latest
+    needs: build
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Create .env file
+      run: |
+        cat << EOF > .env
+        ConnectionStrings__DatabaseConnection="Server=db;Port=3306;Database=audiobooks;Uid=root;Pwd=password;"
+        AzureBlobStorage__ConnectionString=${{ secrets.AZUREBLOBSTORAGE__CONNECTIONSTRING }}
+        SeedDatabase="true"
+        EOF
+
+    - name: Build Docker Images with Specific Names
+      working-directory: ./Services
+      run: |
+        docker build -t niki241618/book-info-service -f ./Dockerfile.bookinfo .
+        docker build -t niki241618/book-streaming-service -f ./Dockerfile.bookstream .
+        docker build -t niki241618/logging-service -f ./Dockerfile.logger .
+    
+    - name: Start Docker Compose services
+      run: docker-compose -f docker-compose.zap.yaml up -d
+
+    - name: Create ZAP rules file
+      run: |
+        mkdir -p .zap
+        cat << EOF > .zap/rules.tsv
+        10049	IGNORE	(Storable and Cacheable Content)
+        10021	IGNORE	(X-Content-Type-Options Header Missing)
+        10048	IGNORE	(Incomplete or No Cache-control and Pragma HTTP Header Set)
+        10075	IGNORE	(Cookie Without SameSite Attribute)
+        EOF
+
+    - name: ZAP Baseline Scan
+      uses: zaproxy/action-baseline@v0.12.0
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+        target: "http://localhost:8080/api/"
+        rules_file_name: '.zap/rules.tsv'
+      env:
+        GITHUB_WORKSPACE: ${{ github.workspace }}
+        GITHUB_ACTION: zap
+
+    - name: Stop Docker Compose services
+      run: docker-compose -f docker-compose.zap.yaml down
