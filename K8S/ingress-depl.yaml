@@ -36,3 +36,10 @@ spec:
                 name: logging-service-nodeport
                 port:
                   number: 80
+          - path: /api/users
+            pathType: Prefix
+            backend:
+              service:
+                name: users-service-nodeport
+                port:
+                  number: 80
