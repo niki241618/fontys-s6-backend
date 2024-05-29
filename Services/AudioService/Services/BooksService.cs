@@ -33,6 +33,14 @@ public class BooksService: IBooksService
 		return books.ToArray();
 	}
 
+	public async Task<Book[]> GetBooksForUser(string userId)
+	{
+		return await dbContext.Books
+			.Where(b => b.OwnerId == userId)
+			.Select(b => b.Convert())
+			.ToArrayAsync();
+	}
+
 	public async Task<Book> GetBook(int id)
 	{
 		BookEntity book = await dbContext.Books.FirstOrDefaultAsync(b => b.Id == id) ?? throw new NotFoundException($"Book with ID {id} is not found.");
@@ -41,11 +49,23 @@ public class BooksService: IBooksService
 		return book.Convert(ratingInfo) ;
 	}
 
+	public async Task<Book?> TryGetBook(int id)
+	{
+		BookEntity? book = await dbContext.Books.FirstOrDefaultAsync(b => b.Id == id);
+		if(book == null)
+			return null;
+		
+		BookRatingInfo ratingInfo = await GetRatingStatsForBook(id);
+		
+		return book.Convert(ratingInfo);
+	}
+
 	public async Task<int> CreateBook(Book toBeCreated, IFormFile audioFile, IFormFile coverImage)
 	{
 		BookEntity bookEntity = new BookEntity
 		{
 			Name = toBeCreated.Name,
+			OwnerId = toBeCreated.OwnerId,
 			Description = toBeCreated.Description,
 			Language = toBeCreated.Language,
 			Genre = toBeCreated.Genre,
@@ -81,16 +101,51 @@ public class BooksService: IBooksService
 
 	public async Task DeleteBook(int id)
 	{
-		BookEntity book = await dbContext.Books.FirstOrDefaultAsync(b => b.Id == id) 
-		                  ?? throw new NotFoundException($"Book with ID {id} is not found.");
-		
-		dbContext.Books.Remove(book);
-		await booksFilesService.DeleteAudioFileAsync(book.AudioUri);
-		
-		string coverImageBlobName = book.CoverUri.Split('/').Last();
-		await booksFilesService.DeleteCoverImageAsync(coverImageBlobName);
-		
-		await dbContext.SaveChangesAsync();
+		// Fetch the book entity
+		var book = await dbContext.Books.SingleOrDefaultAsync(b => b.Id == id);
+    
+		// Check if the book was found
+		if (book == null)
+		{
+			throw new NotFoundException($"Book with ID {id} is not found.");
+		}
+
+		// Begin a transaction to ensure atomic operations
+		await using var transaction = await dbContext.Database.BeginTransactionAsync();
+		try
+		{
+			// Remove the book entity from the database
+			dbContext.Books.Remove(book);
+
+			// Delete associated files asynchronously
+			await Task.WhenAll(
+				booksFilesService.DeleteAudioFileAsync(book.AudioUri),
+				booksFilesService.DeleteCoverImageAsync(book.CoverUri.Split('/').Last())
+			);
+
+			// Save changes in the database
+			await dbContext.SaveChangesAsync();
+
+			// Commit the transaction
+			await transaction.CommitAsync();
+		}
+		catch (Exception)
+		{
+			// Rollback the transaction in case of an error
+			await transaction.RollbackAsync();
+			
+			throw; // Rethrow the exception to handle it further up the call stack if necessary
+		}
+	}
+
+	public async Task DeleteBooksForUser(string userId)
+	{
+		var booksToDelete = dbContext.Books.Where(b => b.OwnerId == userId);
+		if (booksToDelete.Any())
+		{
+			dbContext.Books.RemoveRange(booksToDelete);
+			await dbContext.SaveChangesAsync();
+		}
 	}
 
 	private async Task<BookRatingInfo> GetRatingStatsForBook(int bookId)

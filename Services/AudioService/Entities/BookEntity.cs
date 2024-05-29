@@ -10,6 +10,9 @@ public class BookEntity
 	[DatabaseGenerated(DatabaseGeneratedOption.Identity)]
 	public int Id { get; set; }
 	[Required]
+	[MaxLength(128)]
+	public string OwnerId { get; set; }
+	[Required]
 	public string Name { get; set; }
 	public string Description { get; set; }
 	public string Language { get; set; }
@@ -30,10 +33,11 @@ public class BookEntity
 
 	public Book Convert()
 	{
-		return new Book()
+		return new Book
 		{
 			Id = Id,
 			Name = Name,
+			OwnerId = OwnerId,
 			Description = Description,
 			Language = Language,
 			Genre = Genre,

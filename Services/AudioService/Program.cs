@@ -1,5 +1,6 @@
 using System.Text.Json.Serialization;
 using AudioService;
+using AudioService.Consumers;
 using AudioService.Data;
 using AudioService.Extensions;
 using AudioService.Services;
@@ -99,6 +100,8 @@ builder.WebHost.ConfigureKestrel(options =>
 {
 	options.Limits.MaxRequestBodySize = 500 * 1024 * 1024; // 500 MB
 });
+
+builder.Services.AddHostedService<UserDeletionRmqConsumer>();
 
 AddServices(builder);
 var app = builder.Build();

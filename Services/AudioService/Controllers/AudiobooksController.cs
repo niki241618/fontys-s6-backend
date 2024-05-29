@@ -1,3 +1,4 @@
+using AudioService.Attributes;
 using AudioService.DTOs;
 using AudioService.Models;
 using AudioService.Services.Interfaces;
@@ -44,9 +45,14 @@ namespace AudioService.Controllers
             
             if(!AudioHelper.IsAudiofile(bookDto.AudioFile))
                 return BadRequest("The uploaded file is not an audio file.");
+
+            string userId = User.Claims.FirstOrDefault(claim => claim.Type.Equals("sub"))?.Value ?? null;
+            if (userId == null)
+                return BadRequest("Could not find user id in claims (sub).");
             
             Book book = new Book
             {
+                OwnerId = userId,
                 Name = bookDto.Name,
                 Description = bookDto.Description,
                 Language = bookDto.Language,
@@ -60,6 +66,7 @@ namespace AudioService.Controllers
         }
         
         [Authorize]
+        [OwnsBookRequirement("role:admin")]
         [HttpDelete("{id:int}")]
         public async Task<IActionResult> DeleteBook(int id)
         {
