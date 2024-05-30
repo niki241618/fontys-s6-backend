@@ -36,7 +36,7 @@ public class OwnUserRequirementAttribute : Attribute, IAuthorizationFilter
 
     	var userId = userIdClaim.Value;
     	var routeData = context.RouteData.Values;
-    	if (!routeData.ContainsKey("id"))
+    	if (!routeData.ContainsKey(userIdParamName))
     	{
     		context.Result = new BadRequestResult();
     		return;

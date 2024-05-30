@@ -13,9 +13,9 @@ public class UserDeletionRmqConsumer: BackgroundService
 	private readonly ConnectionFactory factory;
 	private readonly IBooksService booksService;
 	
-	public UserDeletionRmqConsumer(IConfiguration configuration, IBooksService booksService)
+	public UserDeletionRmqConsumer(IConfiguration configuration, IServiceScopeFactory scopeFactory)
 	{
-		this.booksService = booksService;
+		this.booksService = scopeFactory.CreateScope().ServiceProvider.GetRequiredService<IBooksService>();
 		this.factory = new ConnectionFactory
 		{
 			HostName = configuration["ConnectionStrings:RabbitMqHostName"]

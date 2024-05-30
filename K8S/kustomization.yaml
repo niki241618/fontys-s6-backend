@@ -2,6 +2,7 @@ apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 resources:
 - book-info-depl.yaml
+- usersService-depl.yaml
 - logging-depl.yaml
 - mariadb-depl.yaml
 - streaming-depl.yaml

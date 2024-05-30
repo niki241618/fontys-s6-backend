@@ -54,6 +54,7 @@ public class Program
 			});
 		});
 
+		builder.Services.AddMemoryCache();
 		builder.Services.AddScoped<ManagementApi>();
 		builder.Services.AddScoped<UserDeletionProducerRmq>();
 		

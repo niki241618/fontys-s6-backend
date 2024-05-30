@@ -11,7 +11,7 @@ rem Build Docker images
 docker build -t %DOCKERHUB_USERNAME%/book-info-service -f %DOCKERFILE_DIR%\Dockerfile.bookinfo %DOCKERFILE_DIR%
 docker build -t %DOCKERHUB_USERNAME%/book-streaming-service -f %DOCKERFILE_DIR%\Dockerfile.bookstream %DOCKERFILE_DIR%
 docker build -t %DOCKERHUB_USERNAME%/logging-service -f %DOCKERFILE_DIR%\Dockerfile.logger %DOCKERFILE_DIR%
-docker build -t %DOCKERHUB_USERNAME%/user-service -f %DOCKERFILE_DIR%\Dockerfile.userservice %DOCKERFILE_DIR%
+docker build -t %DOCKERHUB_USERNAME%/users-service -f %DOCKERFILE_DIR%\Dockerfile.usersservice %DOCKERFILE_DIR%
 
 rem Ask user if they want to upload images to Docker Hub
 set /p answer="Would you want to upload the images to Docker Hub? (y/n): "
@@ -21,7 +21,7 @@ if /I "%answer%"=="y" (
     docker push %DOCKERHUB_USERNAME%/book-info-service
     docker push %DOCKERHUB_USERNAME%/book-streaming-service
     docker push %DOCKERHUB_USERNAME%/logging-service
-    docker push %DOCKERHUB_USERNAME%/user-service
+    docker push %DOCKERHUB_USERNAME%/users-service
 ) else (
     echo Skipping Docker Hub upload.
 )
