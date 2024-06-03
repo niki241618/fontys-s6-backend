@@ -1,6 +1,7 @@
 using System.Text;
 using System.Text.Json;
 using AudioService.Services.Interfaces;
+using Microsoft.IdentityModel.Tokens;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 using RabbitMQ.Client.Exceptions;
@@ -42,7 +43,7 @@ public class UserDeletionRmqConsumer: BackgroundService
 		
 				var consumer = new EventingBasicConsumer(channel);
 				consumer.Received += OnReceive;
-				channel.BasicConsume("user-deletion", autoAck: true, consumer: consumer);
+				channel.BasicConsume("user-deletion", autoAck: true, consumer);
 		
 				Console.WriteLine("Listening for user deletions...");
 				await Task.Delay(Timeout.Infinite, stoppingToken);
@@ -59,20 +60,23 @@ public class UserDeletionRmqConsumer: BackgroundService
 				await Task.Delay(5000, stoppingToken); // Retry after 5 seconds
 			}
 		}
+		Console.WriteLine("Disconnected from RabbitMQ.");
 	}
 	
 	private async void OnReceive(object? model, BasicDeliverEventArgs args)
 	{
-		Console.WriteLine("Received log.");
+		Console.WriteLine("Received User Deletion message. Deleting user's books...");
 		var bodyBytes = args.Body.ToArray();
-		var messageBody = Encoding.UTF8.GetString(bodyBytes);
+		string? userId = Encoding.UTF8.GetString(bodyBytes);
 
-		if (messageBody == null) 
+		if (userId.IsNullOrEmpty())
+		{
+			Console.WriteLine("Received message body is null. Aborting...");
 			return;
-			
+		}
+		
 		try
 		{
-			string userId = JsonSerializer.Deserialize<string>(messageBody);
 			await booksService.DeleteBooksForUser(userId);
 		}
 		catch (JsonException e)

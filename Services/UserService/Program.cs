@@ -11,7 +11,7 @@ public class Program
 		var builder = WebApplication.CreateBuilder(args);
 
 		// Add services to the container.
-
+		
 		builder.Services.AddControllers();
 		builder.Services.AddAuthentication(options =>
 		{
@@ -67,8 +67,8 @@ public class Program
 			app.UseSwaggerUI();
 		}
 
-		app.UseHttpsRedirection();
-
+		//app.UseHttpsRedirection();
+		app.UseCors(x => x.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader());
 		app.UseAuthentication();
 		app.UseAuthorization();
 		app.UseErrorHandling();

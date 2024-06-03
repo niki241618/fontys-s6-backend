@@ -1,3 +1,4 @@
+using System.Security.Claims;
 using AudioService.Attributes;
 using AudioService.DTOs;
 using AudioService.Models;
@@ -34,6 +35,13 @@ namespace AudioService.Controllers
         {
             return Ok(await booksService.GetBook(id));
         }
+        
+        [Authorize]
+        [HttpGet("user/{userId}")]
+        public async Task<IActionResult> GetBooksForUser(string userId)
+        {
+            return Ok(await booksService.GetBooksForUser(userId));
+        }
 
         [Authorize]
         [HttpPost]
@@ -46,7 +54,7 @@ namespace AudioService.Controllers
             if(!AudioHelper.IsAudiofile(bookDto.AudioFile))
                 return BadRequest("The uploaded file is not an audio file.");
 
-            string userId = User.Claims.FirstOrDefault(claim => claim.Type.Equals("sub"))?.Value ?? null;
+            string userId = User.Claims.FirstOrDefault(claim => claim.Type.Equals(ClaimTypes.NameIdentifier))?.Value ?? null;
             if (userId == null)
                 return BadRequest("Could not find user id in claims (sub).");
             
@@ -58,7 +66,7 @@ namespace AudioService.Controllers
                 Language = bookDto.Language,
                 Genre = bookDto.Genre,
                 Authors = bookDto.Authors,
-                Length = AudioHelper.GetAudioDurationInSeconds(bookDto.AudioFile)
+                Length = bookDto.Length
             };
             
             int createdId = await booksService.CreateBook(book, bookDto.AudioFile, bookDto.CoverImage);
@@ -66,7 +74,7 @@ namespace AudioService.Controllers
         }
         
         [Authorize]
-        [OwnsBookRequirement("role:admin")]
+        [OwnsBookRequirement]
         [HttpDelete("{id:int}")]
         public async Task<IActionResult> DeleteBook(int id)
         {
