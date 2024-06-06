@@ -1,5 +1,7 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Shared;
+using Shared.Auth;
 using Shared.Classes;
 
 namespace LoggingService.Controllers;
@@ -18,6 +20,8 @@ public class LogsController : ControllerBase
 	}
 
 	[HttpGet]
+	[Authorize]
+	[RequiresClaim("role:admin")]
 	public async Task<IActionResult> GetLogs()
 	{
 		List<Log> logs = await loggingService.GetLogs();
@@ -26,6 +30,8 @@ public class LogsController : ControllerBase
 	}
 	
 	[HttpPost]
+	[Authorize]
+	[RequiresClaim("role:admin")]
 	public IActionResult Test([FromBody] string message = "Test")
 	{
 		Log log = new Log(message);

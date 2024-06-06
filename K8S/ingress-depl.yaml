@@ -3,8 +3,10 @@ kind: Ingress
 metadata:
   name: my-ingress
   annotations:
-    # CORS related annotations
+    nginx.ingress.kubernetes.io/proxy-body-size: 700m
+    #CORS related annotations
     nginx.ingress.kubernetes.io/enable-cors: "true"
+    nginx.ingress.kubernetes.io/cors-allow-origin: "*"
     nginx.ingress.kubernetes.io/cors-allow-methods: "GET, POST, PUT, DELETE, OPTIONS"
     nginx.ingress.kubernetes.io/cors-allow-headers: "Origin, Authorization, Content-Type, Accept"
     nginx.ingress.kubernetes.io/cors-expose-headers: "Content-Length"
@@ -34,5 +36,12 @@ spec:
             backend:
               service:
                 name: logging-service-nodeport
+                port:
+                  number: 80
+          - path: /api/users
+            pathType: Prefix
+            backend:
+              service:
+                name: users-service-nodeport
                 port:
                   number: 80

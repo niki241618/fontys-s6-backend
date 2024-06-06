@@ -1,20 +1,20 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: book-info-depl
+  name: users-service-depl
 spec:
   replicas: 1
   selector: 
     matchLabels:
-      app: book-info-service
+      app: users-service
   template:
     metadata:
       labels:
-        app: book-info-service
+        app: users-service
     spec:
       containers:
-        - name: book-info-service
-          image: niki241618/book-info-service
+        - name: users-service
+          image: niki241618/users-service
           resources:
             requests: #Claimed resources
               memory: "256Mi"
@@ -53,6 +53,16 @@ spec:
                 secretKeyRef:
                   name: 'app-secrets'
                   key: 'Auth0__ClientSecret'
+            - name: "Auth0__Management__ClientId"
+              valueFrom: 
+                secretKeyRef:
+                  name: 'app-secrets'
+                  key: 'Auth0__Management__ClientId'
+            - name: "Auth0__Management__ClientSecret"
+              valueFrom: 
+                secretKeyRef:
+                  name: 'app-secrets'
+                  key: 'Auth0__Management__ClientSecret'
             - name: "ConnectionStrings__RabbitMqHostName"
               valueFrom:
                 configMapKeyRef:
@@ -65,11 +75,11 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: book-info-service-nodeport
+  name: users-service-nodeport
 spec:
   type: NodePort
   selector:
-    app: book-info-service
+    app: users-service
   ports:
     - port: 80
       targetPort: 80
@@ -78,13 +88,13 @@ spec:
 apiVersion: autoscaling/v1
 kind: HorizontalPodAutoscaler
 metadata:
-  name: book-info-hpa
+  name: users-service-hpa
   namespace: default
 spec:
   scaleTargetRef:
     apiVersion: apps/v1
     kind: Deployment
-    name: book-info-depl
+    name: users-service-depl
   minReplicas: 1
   maxReplicas: 5
-  targetCPUUtilizationPercentage: 80
+  targetCPUUtilizationPercentage: 50
