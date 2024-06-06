@@ -85,3 +85,37 @@ jobs:
 
     - name: Stop Docker Compose services
       run: docker-compose -f docker-compose.zap.yaml down
+ 
+  deploy:
+    runs-on: ubuntu-latest
+    needs: zap_scan
+    permissions:
+      packages: write
+      contents: read
+      attestations: write
+      id-token: write
+
+    steps:
+    - name: Check out the repo
+      uses: actions/checkout@v4
+
+    - name: Log in to Docker Hub
+      uses: docker/login-action@f4ef78c080cd8ba55a85445d5b36e214a81df20a
+      with:
+        username: niki241618
+        password: ${{ secrets.DOCKER_PASSWORD }}
+
+    - name: Build Docker Images with Specific Names
+      working-directory: ./Services
+      run: |
+        docker build -t niki241618/book-info-service -f ./Dockerfile.bookinfo .
+        docker build -t niki241618/book-streaming-service -f ./Dockerfile.bookstream .
+        docker build -t niki241618/logging-service -f ./Dockerfile.logger .
+        docker build -t niki241618/users-service -f ./Dockerfile.usersservice .
+
+    - name: Push the Docker image
+      run: | 
+        docker push niki241618/book-info-service
+        docker push niki241618/book-streaming-service
+        docker push niki241618/logging-service
+        docker push niki241618/users-service
