@@ -56,7 +56,8 @@ public class Program
 		builder.Services.AddDbContext<LoggingDbContext>(options =>
 		{
 			string connectionString = builder.Configuration.GetConnectionString("DatabaseConnection");
-			options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString));
+			//options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString));
+			options.UseSqlServer(connectionString);
 		}, ServiceLifetime.Singleton);
 
 		builder.Services.AddSingleton<LoggingService>();

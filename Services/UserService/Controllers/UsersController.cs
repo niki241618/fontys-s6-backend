@@ -36,12 +36,4 @@ public class UsersController : ControllerBase
 			return BadRequest("An error occurred while deleting the user.");
 		}
 	}
-	
-	
-	[HttpDelete("test/{userId}")]
-	public IActionResult DeleteDataTest(string userId)
-	{
-		userDeletionProducer.MessageUserDeleted(userId);
-		return Ok("User deleted successfully");
-	}
 }

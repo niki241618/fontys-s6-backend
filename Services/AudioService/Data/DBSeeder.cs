@@ -1,4 +1,5 @@
 using AudioService.Entities;
+using Microsoft.EntityFrameworkCore;
 using Shared.SharedMiddleware;
 
 namespace AudioService.Data;
@@ -57,8 +58,19 @@ public class DbSeeder
 			AudioUri = "4c83c2c9-8307-4ee8-a2fe-32b578bd2d0d.mp3",
 			CoverUri = "https://audiooasisaudiobookstest.blob.core.windows.net/coverimages/c52017ca-8ebc-4e3c-8d65-532cc5cf715b.jpg"
 		});
-		
-		dbContext.SaveChanges();
+
+		using var transaction = dbContext.Database.BeginTransaction();
+		try
+		{
+			dbContext.Database.ExecuteSqlRaw("SET IDENTITY_INSERT BooksInfo ON");
+			dbContext.SaveChanges();
+			dbContext.Database.ExecuteSqlRaw("SET IDENTITY_INSERT BooksInfo OFF");
+			transaction.Commit();
+		}
+		catch (Exception)
+		{
+			transaction.Rollback();
+		}
 	}
 	
 	private void UpsertBook(BookEntity book)

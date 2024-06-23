@@ -1,0 +1,28 @@
+apiVersion: cert-manager.io/v1
+kind: ClusterIssuer
+metadata:
+  name: letsencrypt-production
+spec:
+  acme:
+    server: https://acme-v02.api.letsencrypt.org/directory
+    email: nikito241618@gmail.com
+    privateKeySecretRef:
+      name: letsencrypt-production-private-key
+    solvers:
+    - http01:
+        ingress:
+          name: my-ingress
+# ---
+# apiVersion: cert-manager.io/v1
+# kind: Certificate
+# metadata:
+#   name: my-cert
+#   namespace: default
+# spec:
+#   secretName: my-cert-secret
+#   issuerRef:
+#     name: letsencrypt-prod
+#     kind: ClusterIssuer
+#   commonName: 34.91.84.35
+#   dnsNames:
+#   - 34.91.84.35

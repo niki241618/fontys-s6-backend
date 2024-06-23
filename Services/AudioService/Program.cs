@@ -73,7 +73,8 @@ builder.Services.AddDbContext<BooksContext>(options =>
 	string connectionString = builder.Configuration.GetConnectionString("DatabaseConnection");
 	try
 	{
-		options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString));
+		options.UseSqlServer(connectionString);
+		//options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString));
 	}
 	catch (Exception)
 	{
