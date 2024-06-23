@@ -140,6 +140,8 @@ jobs:
 
     - name: 'Set up Cloud SDK'
       uses: 'google-github-actions/setup-gcloud@v2'
+      with:
+        project_id: astral-option-427116-t2
 
     - name: 'Use gcloud CLI'
       run: 'gcloud info'
@@ -149,7 +151,7 @@ jobs:
       env:
         GOOGLE_PROJECT: astral-option-427116-t2
       run: |
-        gcloud auth configure-docker eu-west4-docker.pkg.dev
+        gcloud auth configure-docker europe-west4-docker.pkg.dev
         docker build -t europe-west4-docker.pkg.dev/astral-option-427116-t2/audio-oasis-test/book-info-service -f ./Dockerfile.bookinfo .
         docker push europe-west4-docker.pkg.dev/astral-option-427116-t2/audio-oasis-test/book-info-service
         docker build -t europe-west4-docker.pkg.dev/astral-option-427116-t2/audio-oasis-test/book-streaming-service -f ./Dockerfile.bookstream .
@@ -172,4 +174,3 @@ jobs:
         kubectl apply -f usersService-depl.yaml
         kubectl apply -f cert-manager.yaml
         kubectl apply -f ingress-depl.yaml
-        
