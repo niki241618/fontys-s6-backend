@@ -173,5 +173,5 @@ jobs:
         kubectl apply -f rabbitmq-depl.yaml
         kubectl apply -f streaming-depl.yaml
         kubectl apply -f usersService-depl.yaml
-        kubectl apply -f cert-manager.yaml
-        kubectl apply -f ingress-depl.yaml
+        # kubectl apply -f cert-manager.yaml
+        # kubectl apply -f ingress-depl.yaml
