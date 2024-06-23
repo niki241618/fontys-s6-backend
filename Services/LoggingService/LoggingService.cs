@@ -11,6 +11,7 @@ public class LoggingService
 	public LoggingService(LoggingDbContext dbContext)
 	{
 		this.dbContext = dbContext;
+		dbContext.Database.Migrate();
 	}
 
 	public async Task SaveLog(LogEntity logEntity)

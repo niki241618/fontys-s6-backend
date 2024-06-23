@@ -2,7 +2,7 @@ using Shared.Classes;
 
 namespace Shared;
 
-public class ConsoleLogger : ILogging
+public class ConsoleLogger : ILogger
 {
 	public void Log(Log log)
 	{

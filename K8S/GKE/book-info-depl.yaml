@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
         - name: book-info-service
-          image: niki241618/book-info-service
+          image: europe-west4-docker.pkg.dev/astral-option-427116-t2/audio-oasis/book-info-service
           resources:
             requests: #Claimed resources
               memory: "256Mi"

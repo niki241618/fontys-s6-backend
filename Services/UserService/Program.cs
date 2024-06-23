@@ -1,9 +1,8 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
-using Shared;
+using Shared.SharedMiddleware;
 
-namespace LoggingService;
+namespace User_Service;
 
 public class Program
 {
@@ -12,9 +11,8 @@ public class Program
 		var builder = WebApplication.CreateBuilder(args);
 
 		// Add services to the container.
-
+		
 		builder.Services.AddControllers();
-		builder.Services.AddAuthorization();
 		builder.Services.AddAuthentication(options =>
 		{
 			options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -25,6 +23,8 @@ public class Program
 			options.Authority = $"https://{builder.Configuration["Auth0:Domain"]}/";
 			options.Audience = builder.Configuration["Auth0:Audience"];
 		});
+		builder.Services.AddAuthorization();
+
 		// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 		builder.Services.AddEndpointsApiExplorer();
 		builder.Services.AddSwaggerGen(setup =>
@@ -53,32 +53,29 @@ public class Program
 				{ jwtSecurityScheme, Array.Empty<string>() }
 			});
 		});
-		builder.Services.AddDbContext<LoggingDbContext>(options =>
-		{
-			string connectionString = builder.Configuration.GetConnectionString("DatabaseConnection");
-			//options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString));
-			options.UseSqlServer(connectionString);
-		}, ServiceLifetime.Singleton);
 
-		builder.Services.AddSingleton<LoggingService>();
-		builder.Services.AddSingleton<RabbitMqLogEventConsumer>();
-
-		//Inject the RabbitMqLogger with the connection string
-		builder.Services.AddScoped<RabbitMqLogger>(x => ActivatorUtilities.CreateInstance<RabbitMqLogger>(x, builder.Configuration.GetConnectionString("RabbitMqHostName")));
-
-		builder.Services.AddHostedService<RabbitMqLogEventConsumer>();
+		builder.Services.AddMemoryCache();
+		builder.Services.AddScoped<ManagementApi>();
+		builder.Services.AddScoped<UserDeletionProducerRmq>();
 		
 		var app = builder.Build();
-		
-		app.UseSwagger();
-        app.UseSwaggerUI();
 
-		app.UseHttpsRedirection();
+		// Configure the HTTP request pipeline.
+		if (app.Environment.IsDevelopment())
+		{
+			app.UseSwagger();
+			app.UseSwaggerUI();
+		}
 
+		//app.UseHttpsRedirection();
+		app.UseCors(x => x.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader());
 		app.UseAuthentication();
 		app.UseAuthorization();
+		app.UseErrorHandling();
+
 		app.MapControllers();
 		
+
 		app.Run();
 	}
 }

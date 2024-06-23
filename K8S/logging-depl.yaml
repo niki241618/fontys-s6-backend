@@ -28,6 +28,31 @@ spec:
                 secretKeyRef:
                   name: 'app-secrets'
                   key: 'ConnectionStrings__DatabaseConnection'
+            - name: "Auth0__Domain"
+              valueFrom: 
+                secretKeyRef:
+                  name: 'app-secrets'
+                  key: 'Auth0__Domain'
+            - name: "Auth0__Audience"
+              valueFrom: 
+                secretKeyRef:
+                  name: 'app-secrets'
+                  key: 'Auth0__Audience'
+            - name: "Auth0__ClientId"
+              valueFrom: 
+                secretKeyRef:
+                  name: 'app-secrets'
+                  key: 'Auth0__ClientId'
+            - name: "Auth0__ClientSecret"
+              valueFrom: 
+                secretKeyRef:
+                  name: 'app-secrets'
+                  key: 'Auth0__ClientSecret'
+            - name: "ConnectionStrings__RabbitMqHostName"
+              valueFrom:
+                configMapKeyRef:
+                  name: 'config'
+                  key: 'RabbitMqHostName'
 #Declare the node port
 ---
 apiVersion: v1

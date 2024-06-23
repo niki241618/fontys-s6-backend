@@ -4,8 +4,6 @@ resources:
 - book-info-depl.yaml
 - usersService-depl.yaml
 - logging-depl.yaml
-- mariadb-depl.yaml
 - streaming-depl.yaml
 - rabbitmq-depl.yaml
-- ingress-depl.yaml
-- ingress-setup.yaml
+#- ingress-depl.yaml
