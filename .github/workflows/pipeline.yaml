@@ -142,6 +142,7 @@ jobs:
       uses: 'google-github-actions/setup-gcloud@v2'
       with:
         project_id: astral-option-427116-t2
+        install_components: 'gke-gcloud-auth-plugin'
 
     - name: 'Use gcloud CLI'
       run: 'gcloud info'
