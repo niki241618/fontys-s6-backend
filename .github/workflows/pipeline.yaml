@@ -1,4 +1,4 @@
-name: Run Controller Tests
+name: Build, Test, Deploy
 
 on:
   push:
